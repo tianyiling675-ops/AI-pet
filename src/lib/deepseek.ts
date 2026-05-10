@@ -2,7 +2,7 @@ import type { ClassifyResult, ChatMessage } from '@/types'
 import { chatCompletion } from '@/lib/openrouter'
 import type OpenAI from 'openai'
 
-const MODEL = process.env.CHAT_MODEL || 'deepseek/deepseek-v4-flash'
+const MODEL = process.env.CHAT_MODEL || 'deepseek/deepseek-v4-flash-20260423'
 
 export async function classify(message: string): Promise<ClassifyResult> {
   const resp = await chatCompletion({
@@ -105,7 +105,6 @@ export async function extractMemory(
     _label: 'memory',
     model: MODEL,
     temperature: 0,
-    response_format: { type: 'json_object' },
     messages: [
       {
         role: 'system',

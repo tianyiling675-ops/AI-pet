@@ -92,6 +92,8 @@ export async function chatCompletion(
     if (err instanceof OpenAI.APIError) {
       if (err.status === 401) throw new Error('OpenRouter 认证失败：请检查 OPENROUTER_API_KEY')
       if (err.status === 429) throw new Error('OpenRouter 请求超限（429），请稍后重试')
+      const body = err.error ? JSON.stringify(err.error) : err.message
+      throw new Error(`OpenRouter ${err.status} [model=${rest.model}]: ${body}`)
     }
     if (err instanceof Error && err.name === 'AbortError') {
       throw new Error('OpenRouter 请求超时（30s）')
