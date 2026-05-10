@@ -60,3 +60,13 @@ export interface ApiResponse<T> {
   data: T | null
   error: string | null
 }
+
+export interface PetHomeData {
+  petId: PetId
+  affinity: number
+  mood: string
+  moodEmoji: string
+  status: string
+  quote: string
+  diary: string[]
+}
