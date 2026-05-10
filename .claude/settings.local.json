@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"e:\\\\林恬伊2.0\\\\AI-pet\")",
+      "Bash(dir \"e:\\\\林恬伊2.0\\\\AI-pet\")",
+      "Bash(ls \"C:\\\\Users\\\\林恬伊\\\\.claude\\\\projects\\\\e-----2-0-AI-pet\\\\memory\\\\\" 2>/dev/null || echo \"checking memory dir\")",
+      "Read(//c/Users/林恬伊/.claude/projects/e-----2-0-AI-pet/memory\" 2>/dev/**)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(Set-Location \"e:\\\\林恬伊2.0\\\\AI-pet\"; $env:NEXT_PUBLIC_SUPABASE_URL=\"https://placeholder.supabase.co\"; $env:NEXT_PUBLIC_SUPABASE_ANON_KEY=\"placeholder\"; $env:SUPABASE_SERVICE_ROLE_KEY=\"placeholder\"; $env:DEEPSEEK_API_KEY=\"placeholder\"; $env:SEEDREAM_API_KEY=\"placeholder\"; $env:NEXTAUTH_SECRET=\"placeholder-secret-32chars-minimum\"; npx next build 2>&1)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__wait_for",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__get_network_request",
+      "mcp__chrome-devtools__list_console_messages",
+      "Bash(curl -s -X POST https://openrouter.ai/api/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer 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' -d '{\"model\":\"deepseek/deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}' --max-time 15)",
+      "Bash(curl -s -X POST https://openrouter.ai/api/v1/chat/completions -H 'Content-Type: application/json' -H 'Authorization: Bearer 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' -d '{\"model\":\"deepseek/deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"test\"}],\"response_format\":{\"type\":\"json_object\"}}' --max-time 15)"
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { createServiceClient } from '@/lib/supabase'
+import { classify, chat, scoreAffinity, generateImageScene } from '@/lib/deepseek'
+import { generateImage } from '@/lib/seedream'
+import { buildSystemPrompt, CRISIS_RESPONSE } from '@/lib/prompts'
+import type { ChatApiRequest, ChatApiResponse, Memory, PetId } from '@/types'
+
+const MOOD_MAP: Record<string, { mood: string; mood_emoji: string }> = {
+  ping_an: { mood: '慵懒', mood_emoji: '😺' },
+  mo:      { mood: '若有所思', mood_emoji: '🐾' },
+  chi:     { mood: '跃跃欲试', mood_emoji: '🔥' },
+  hawk:    { mood: '若即若离', mood_emoji: '🦅' },
+}
+
+const MOOD_HIGH: Record<string, { mood: string; mood_emoji: string }> = {
+  ping_an: { mood: '亲近', mood_emoji: '🧡' },
+  mo:      { mood: '平静', mood_emoji: '🌿' },
+  chi:     { mood: '得意', mood_emoji: '✨' },
+  hawk:    { mood: '注视', mood_emoji: '👁️' },
+}
+
+function pickMood(petId: string, affinity: number) {
+  if (affinity >= 70) return MOOD_HIGH[petId] || MOOD_MAP[petId]
+  return MOOD_MAP[petId]
+}
+
+export async function POST(req: NextRequest) {
+  try {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json({ data: null, error: '未登录' }, { status: 401 })
+  }
+
+  const { petId, message, history } = (await req.json()) as ChatApiRequest
+  const userId = session.user.id
+  const supabase = createServiceClient()
+
+  // 加载宠物状态和记忆
+  const [{ data: stateRows }, { data: kvRows }, { data: diaryRows }] = await Promise.all([
+    supabase
+      .from('pet_states')
+      .select('affinity,mood,mood_emoji')
+      .eq('user_id', userId)
+      .eq('pet_id', petId)
+      .single(),
+    supabase.from('memories_kv').select('key,value').eq('user_id', userId).eq('pet_id', petId),
+    supabase
+      .from('memories_diary')
+      .select('content,created_at')
+      .eq('user_id', userId)
+      .eq('pet_id', petId)
+      .order('created_at', { ascending: false })
+      .limit(8),
+  ])
+
+  const affinity: number = stateRows?.affinity ?? 50
+  const memory: Memory = {
+    kv: kvRows || [],
+    diary: diaryRows || [],
+  }
+
+  // 步骤1：分类
+  const { is_crisis, should_generate_image } = await classify(message)
+
+  // 步骤2：危机处理
+  if (is_crisis) {
+    const response: ChatApiResponse = {
+      reply: CRISIS_RESPONSE,
+      affinityDelta: 0,
+      ...pickMood(petId, affinity),
+    }
+    return NextResponse.json({ data: response, error: null })
+  }
+
+  // 步骤3：生成回复
+  const systemPrompt = buildSystemPrompt(petId as PetId, affinity, memory)
+  const reply = await chat(systemPrompt, history, message)
+
+  // 步骤4：好感度打分（并行图像生成）
+  const scorePromise = scoreAffinity(reply, message)
+
+  let imageUrl: string | undefined
+  if (should_generate_image) {
+    const scenePromise = generateImageScene(petId, [...history, { role: 'user', content: message }])
+    const scene = await scenePromise
+    imageUrl = await generateImage(petId as PetId, scene) ?? undefined
+  }
+
+  const delta = await scorePromise
+  const newAffinity = Math.max(0, Math.min(100, affinity + delta))
+  const moodState = pickMood(petId, newAffinity)
+
+  // 更新好感度
+  await supabase
+    .from('pet_states')
+    .update({ affinity: newAffinity, ...moodState, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('pet_id', petId)
+
+  const response: ChatApiResponse = {
+    reply,
+    imageUrl,
+    affinityDelta: delta,
+    ...moodState,
+  }
+
+  return NextResponse.json({ data: response, error: null })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[api/chat] 未捕获异常:', msg)
+    return NextResponse.json({ data: null, error: msg }, { status: 500 })
+  }
+}
