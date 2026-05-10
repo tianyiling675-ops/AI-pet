@@ -118,6 +118,13 @@ export const PETS: Record<PetId, PetConfig> = {
 
 export const PET_IDS = Object.keys(PETS) as PetId[]
 
+export const PET_FALLBACK_BG: Record<PetId, string> = {
+  ping_an: '#5c3d1e',
+  mo:      '#2c3a4a',
+  chi:     '#5c1e1e',
+  hawk:    '#2a2a2a',
+}
+
 export function affinityToLevel(affinity: number): '低' | '中' | '高' {
   if (affinity < 40) return '低'
   if (affinity < 70) return '中'
