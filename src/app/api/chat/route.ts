@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase'
 import { classify, chat, scoreAffinity, generateImageScene } from '@/lib/deepseek'
 import { generateImage } from '@/lib/seedream'
+import { uploadBase64ToR2 } from '@/lib/r2'
 import { buildSystemPrompt, CRISIS_RESPONSE } from '@/lib/prompts'
 import type { ChatApiRequest, ChatApiResponse, Memory, PetId } from '@/types'
 
@@ -86,11 +87,16 @@ export async function POST(req: NextRequest) {
   // 步骤4：好感度打分（并行图像生成）
   const scorePromise = scoreAffinity(reply, message)
 
-  let imageUrl: string | undefined
+  let imageUrl: string | undefined  // 返回给前端显示
+  let imageR2Url: string | undefined  // 存入 DB（仅 R2 URL，不存 base64）
   if (should_generate_image) {
-    const scenePromise = generateImageScene(petId, [...history, { role: 'user', content: message }])
-    const scene = await scenePromise
-    imageUrl = await generateImage(petId as PetId, scene) ?? undefined
+    const scene = await generateImageScene(petId, [...history, { role: 'user', content: message }])
+    const base64 = await generateImage(petId as PetId, scene)
+    if (base64) {
+      const r2Url = await uploadBase64ToR2(base64, petId)
+      imageR2Url = r2Url ?? undefined
+      imageUrl = r2Url ?? base64  // R2 优先，失败则临时用 base64 展示
+    }
   }
 
   const delta = await scorePromise
@@ -104,10 +110,10 @@ export async function POST(req: NextRequest) {
     .eq('user_id', userId)
     .eq('pet_id', petId)
 
-  // 保存生成的图片（fire-and-forget）
-  if (imageUrl) {
+  // 保存图片到 DB（只存 R2 URL，不存 base64）
+  if (imageR2Url) {
     void Promise.resolve(
-      supabase.from('pet_moments').insert({ user_id: userId, pet_id: petId, image_url: imageUrl })
+      supabase.from('pet_moments').insert({ user_id: userId, pet_id: petId, image_url: imageR2Url })
     ).catch(() => {})
   }
 
