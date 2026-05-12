@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/林恬伊/.claude/**)",
+      "Read(//c/Users/林恬伊/**)"
+    ]
+  }
+}
