@@ -61,6 +61,11 @@ export async function POST(req: NextRequest) {
     diary: diaryRows || [],
   }
 
+  // 用户消息立刻存入 DB，不等 AI 结果（防止模型失败时丢失记录）
+  void Promise.resolve(
+    supabase.from('chat_messages').insert({ user_id: userId, pet_id: petId, role: 'user', content: message })
+  ).catch(() => {})
+
   // 步骤1：分类
   const { is_crisis, should_generate_image } = await classify(message)
 
@@ -98,6 +103,18 @@ export async function POST(req: NextRequest) {
     .update({ affinity: newAffinity, ...moodState, updated_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('pet_id', petId)
+
+  // 保存生成的图片（fire-and-forget）
+  if (imageUrl) {
+    void Promise.resolve(
+      supabase.from('pet_moments').insert({ user_id: userId, pet_id: petId, image_url: imageUrl })
+    ).catch(() => {})
+  }
+
+  // AI 回复存入 DB
+  void Promise.resolve(
+    supabase.from('chat_messages').insert({ user_id: userId, pet_id: petId, role: 'assistant', content: reply })
+  ).catch(() => {})
 
   const response: ChatApiResponse = {
     reply,

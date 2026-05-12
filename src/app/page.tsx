@@ -15,7 +15,7 @@ export default async function HomePage() {
   const userEmail = session.user.email ?? ''
   const supabase = createServiceClient()
 
-  const [{ data: stateRows }, { data: diaryRows }] = await Promise.all([
+  const [{ data: stateRows }, { data: diaryRows }, { data: momentRows }] = await Promise.all([
     supabase
       .from('pet_states')
       .select('pet_id, affinity, mood, mood_emoji')
@@ -26,6 +26,12 @@ export default async function HomePage() {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(12),
+    supabase
+      .from('pet_moments')
+      .select('pet_id, image_url')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   const quotes = pickQuotesForAllPets()
@@ -35,6 +41,14 @@ export default async function HomePage() {
     if (!diaryByPet[row.pet_id]) diaryByPet[row.pet_id] = []
     if (diaryByPet[row.pet_id].length < 3) {
       diaryByPet[row.pet_id].push(row.content)
+    }
+  }
+
+  const momentsByPet: Record<string, string[]> = {}
+  for (const row of momentRows ?? []) {
+    if (!momentsByPet[row.pet_id]) momentsByPet[row.pet_id] = []
+    if (momentsByPet[row.pet_id].length < 4) {
+      momentsByPet[row.pet_id].push(row.image_url)
     }
   }
 
@@ -54,6 +68,7 @@ export default async function HomePage() {
       status: petCopyMap[petId].statusByAffinity[level],
       quote: quotes[petId],
       diary: diaryByPet[petId] ?? [],
+      moments: momentsByPet[petId] ?? [],
     }
   })
 

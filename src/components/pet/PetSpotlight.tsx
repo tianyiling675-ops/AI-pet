@@ -9,9 +9,10 @@ interface Props {
   playing: boolean
   onTogglePlay: () => void
   userEmail: string
+  moments: string[]
 }
 
-export default function PetSpotlight({ selected, playing, onTogglePlay, userEmail }: Props) {
+export default function PetSpotlight({ selected, playing, onTogglePlay, userEmail, moments }: Props) {
   const [avatarOpen, setAvatarOpen] = useState(false)
   const avatarRef = useRef<HTMLDivElement>(null)
 
@@ -128,19 +129,31 @@ export default function PetSpotlight({ selected, playing, onTogglePlay, userEmai
               它留下的痕迹
               <span className="text-[#c08e5f]">✦</span>
             </h3>
-            <div className="flex gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="flex-1 min-w-0">
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden mb-1 bg-white/5 border border-white/[0.06]" />
-                  <p className="text-[10px] text-white/25 text-center truncate">还没有照片</p>
+            {moments.length === 0 ? (
+              <p className="text-xs text-white/20">聊天时拍下的照片会出现在这里</p>
+            ) : (
+              <div className="flex gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex-1 min-w-0">
+                    <div className="aspect-[4/3] rounded-xl overflow-hidden mb-1 bg-white/5 border border-white/[0.06]">
+                      {moments[i] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={moments[i]}
+                          alt=""
+                          className="w-full h-full object-cover grayscale brightness-75 hover:grayscale-0 hover:brightness-100 transition-all cursor-pointer"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div className="w-8 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  </svg>
                 </div>
-              ))}
-              <div className="w-8 flex items-center justify-center">
-                <svg className="w-4 h-4 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
               </div>
-            </div>
+            )}
           </div>
 
         </div>

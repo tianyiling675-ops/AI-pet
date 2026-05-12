@@ -40,6 +40,7 @@ export default function PetSelectClient({ petsData, userEmail }: Props) {
           playing={playing}
           onTogglePlay={() => setPlaying((p) => !p)}
           userEmail={userEmail}
+          moments={selected.moments}
         />
         <PetDetailPanel
           selected={selected}

@@ -35,6 +35,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   imageUrl?: string
+  createdAt?: string
 }
 
 export interface ClassifyResult {
@@ -69,4 +70,5 @@ export interface PetHomeData {
   status: string
   quote: string
   diary: string[]
+  moments: string[]
 }
