@@ -1,47 +1,30 @@
-import type { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
-import { createServiceClient } from '@/lib/supabase'
+import { betterAuth } from 'better-auth'
+import { Pool } from 'pg'
 
-export const authOptions: NextAuthOptions = {
-  session: { strategy: 'jwt' },
-  pages: {
-    signIn: '/login',
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+})
+
+export const auth = betterAuth({
+  database: pool,
+  secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+  emailAndPassword: {
+    enabled: true,
   },
-  providers: [
-    CredentialsProvider({
-      name: 'credentials',
-      credentials: {
-        email: { label: '邮箱', type: 'email' },
-        password: { label: '密码', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-
-        const supabase = createServiceClient()
-        const { data: user } = await supabase
-          .from('users')
-          .select('id, email, password_hash')
-          .eq('email', credentials.email)
-          .single()
-
-        if (!user) return null
-
-        const valid = await bcrypt.compare(credentials.password, user.password_hash)
-        if (!valid) return null
-
-        return { id: user.id, email: user.email }
-      },
-    }),
-  ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id
-      return token
-    },
-    session({ session, token }) {
-      if (session.user) session.user.id = token.id as string
-      return session
-    },
+  socialProviders: {
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
   },
-}
+  user: { modelName: 'ba_user' },
+  session: { modelName: 'ba_session' },
+  account: { modelName: 'ba_account' },
+  verification: { modelName: 'ba_verification' },
+})

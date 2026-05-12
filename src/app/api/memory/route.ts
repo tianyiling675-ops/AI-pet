@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase'
 import type { PetId, Memory } from '@/types'
 import { extractMemory } from '@/lib/deepseek'
 import type { ChatMessage } from '@/types'
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session = await auth.api.getSession({ headers: req.headers })
   if (!session?.user?.id) {
     return NextResponse.json({ data: null, error: '未登录' }, { status: 401 })
   }
@@ -40,7 +39,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
+  const session = await auth.api.getSession({ headers: req.headers })
   if (!session?.user?.id) {
     return NextResponse.json({ data: null, error: '未登录' }, { status: 401 })
   }

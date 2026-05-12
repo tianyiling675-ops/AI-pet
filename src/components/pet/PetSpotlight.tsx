@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { signOut } from 'next-auth/react'
+import { signOut } from '@/lib/auth-client'
 import { PETS, petCopyMap, PET_FALLBACK_BG } from '@/lib/pets'
 import type { PetHomeData } from '@/types'
 
@@ -47,7 +47,7 @@ export default function PetSpotlight({ selected, playing, onTogglePlay, userEmai
           {avatarOpen && (
             <div className="absolute right-0 top-full mt-2 bg-[#1e1a16] rounded-xl shadow-xl border border-white/10 overflow-hidden z-20 w-28">
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => signOut({ fetchOptions: { onSuccess: () => window.location.href = '/login' } })}
                 className="w-full text-left px-4 py-3 text-sm text-white/60 hover:bg-white/5 transition-colors"
               >
                 退出登录

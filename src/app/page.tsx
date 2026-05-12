@@ -1,5 +1,5 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase'
 import { PET_IDS, petCopyMap, affinityToLevelEn } from '@/lib/pets'
@@ -8,7 +8,7 @@ import PetSelectClient from '@/components/pet/PetSelectClient'
 import type { PetId, PetHomeData } from '@/types'
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth.api.getSession({ headers: headers() })
   if (!session?.user?.id) redirect('/login')
 
   const userId = session.user.id

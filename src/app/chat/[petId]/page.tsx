@@ -1,5 +1,5 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { PETS, PET_IDS, petCopyMap, affinityToLevelEn } from '@/lib/pets'
 import { createServiceClient } from '@/lib/supabase'
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default async function ChatPage({ params }: Props) {
-  const session = await getServerSession(authOptions)
+  const session = await auth.api.getSession({ headers: headers() })
   if (!session?.user?.id) redirect('/login')
 
   if (!PET_IDS.includes(params.petId as PetId)) notFound()

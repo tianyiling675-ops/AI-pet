@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase'
 import { classify, chat, scoreAffinity, generateImageScene } from '@/lib/deepseek'
 import { generateImage } from '@/lib/seedream'
@@ -29,7 +28,7 @@ function pickMood(petId: string, affinity: number) {
 
 export async function POST(req: NextRequest) {
   try {
-  const session = await getServerSession(authOptions)
+  const session = await auth.api.getSession({ headers: req.headers })
   if (!session?.user?.id) {
     return NextResponse.json({ data: null, error: '未登录' }, { status: 401 })
   }
