@@ -24,18 +24,18 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-end"
+      className="min-h-screen flex items-center justify-center md:justify-end px-4 md:px-0"
       style={{
         backgroundImage: "url('/login-bg.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'left center',
         fontFamily: 'Manrope, system-ui, sans-serif',
-        paddingRight: 'clamp(2rem, 8vw, 10rem)',
+        paddingRight: 'clamp(1rem, 8vw, 10rem)',
       }}
     >
       {/* 羊皮纸卡片 */}
       <div
-        className="relative w-[420px] rounded-[2rem] overflow-hidden"
+        className="relative w-full max-w-[420px] rounded-[2rem] overflow-hidden"
         style={{
           background: 'rgba(240, 225, 200, 0.18)',
           backdropFilter: 'blur(28px)',

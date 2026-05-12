@@ -111,10 +111,10 @@ export default function ChatClient({
       </div>
 
       {/* 主布局 */}
-      <div className="flex h-full gap-4 p-4 md:p-6 relative z-10">
+      <div className="flex h-full md:gap-4 md:p-4 lg:p-6 relative z-10">
 
-        {/* ── 左侧宠物切换栏 ── */}
-        <aside className="flex-shrink-0 flex flex-col items-center py-8 rounded-2xl" style={{
+        {/* ── 左侧宠物切换栏（桌面） ── */}
+        <aside className="hidden md:flex flex-shrink-0 flex-col items-center py-8 rounded-2xl" style={{
           width: 80,
           background: 'rgba(70,55,45,0.25)',
           backdropFilter: 'blur(20px)',
@@ -175,14 +175,42 @@ export default function ChatClient({
         </aside>
 
         {/* ── 中间聊天区 ── */}
-        <main className="flex-grow flex flex-col min-w-0 rounded-3xl overflow-hidden my-2" style={{
+        <main className="flex-grow flex flex-col min-w-0 rounded-none md:rounded-3xl overflow-hidden md:my-2" style={{
           background: 'rgba(40,30,20,0.08)',
           backdropFilter: 'blur(12px)',
           border: '1px solid rgba(242,190,140,0.2)',
           boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
         }}>
-          {/* 顶部栏 */}
-          <header className="flex items-center px-10 shrink-0" style={{
+          {/* 顶部栏（手机） */}
+          <header className="md:hidden flex items-center gap-3 px-4 shrink-0" style={{
+            height: 64,
+            borderBottom: '1px solid rgba(242,190,140,0.15)',
+            background: 'rgba(0,0,0,0.2)',
+          }}>
+            <button
+              onClick={async () => { await saveMemory(); router.push('/') }}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: 'rgba(240,189,139,0.7)' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/pets/${pet.id}.jpg`} alt={pet.name}
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              style={{ boxShadow: '0 0 0 2px rgba(240,189,139,0.4)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate" style={{ color: '#f1dfd3' }}>{pet.name}</p>
+              <p className="text-[10px] truncate" style={{ color: 'rgba(240,189,139,0.7)' }}>
+                {mood} {moodEmoji}
+              </p>
+            </div>
+          </header>
+
+          {/* 顶部栏（桌面） */}
+          <header className="hidden md:flex items-center px-10 shrink-0" style={{
             height: 96,
             borderBottom: '1px solid rgba(242,190,140,0.15)',
             background: 'rgba(0,0,0,0.1)',
@@ -196,7 +224,7 @@ export default function ChatClient({
           </header>
 
           {/* 消息列表 */}
-          <section className="flex-grow overflow-y-auto scrollbar-hide px-10 py-8 flex flex-col gap-8">
+          <section className="flex-grow overflow-y-auto scrollbar-hide px-4 md:px-10 py-6 md:py-8 flex flex-col gap-6 md:gap-8">
             <div className="flex justify-center">
               <span className="text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ color: '#9c8e82' }}>TODAY</span>
             </div>
@@ -295,7 +323,7 @@ export default function ChatClient({
           </section>
 
           {/* 输入框 */}
-          <footer className="px-8 pb-8 pt-4 shrink-0" style={{ background: 'rgba(0,0,0,0.05)' }}>
+          <footer className="px-4 md:px-8 pb-4 md:pb-8 pt-3 md:pt-4 shrink-0" style={{ background: 'rgba(0,0,0,0.05)' }}>
             <div className="flex items-center gap-3 px-6 py-3 rounded-2xl transition-all duration-300" style={{
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(242,190,140,0.2)',
@@ -327,8 +355,8 @@ export default function ChatClient({
           </footer>
         </main>
 
-        {/* ── 右侧宠物存在感面板 ── */}
-        <aside className="flex-shrink-0 flex flex-col overflow-hidden" style={{
+        {/* ── 右侧宠物存在感面板（桌面） ── */}
+        <aside className="hidden lg:flex flex-shrink-0 flex-col overflow-hidden" style={{
           width: 380,
           borderRadius: '2.5rem',
           background: 'rgba(183,172,143,0.15)',
