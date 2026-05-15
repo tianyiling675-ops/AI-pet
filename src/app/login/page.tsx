@@ -21,7 +21,14 @@ export default function LoginPage() {
       password,
       callbackURL: '/',
       fetchOptions: {
-        onError: (ctx) => setError(ctx.error.message || '邮箱或密码不正确'),
+        onError: (ctx) => {
+          const msg = ctx.error.message || ''
+          if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('verif')) {
+            setError('请先验证邮箱，检查你的收件箱。')
+          } else {
+            setError(msg || '邮箱或密码不正确')
+          }
+        },
         onSuccess: () => router.push('/'),
       },
     })

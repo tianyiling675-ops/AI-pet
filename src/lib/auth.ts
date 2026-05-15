@@ -1,5 +1,8 @@
 import { betterAuth } from 'better-auth'
 import { Pool } from 'pg'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -12,6 +15,17 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const { data, error } = await resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: user.email,
+        subject: '验证你的邮箱',
+        html: `<p>你好，</p><p>点击下方链接完成邮箱验证：</p><p><a href="${url}">${url}</a></p><p>链接 1 小时内有效。</p>`,
+      })
+      if (error) console.error('[Resend] 发送失败:', error)
+      else console.log('[Resend] 发送成功, id:', data?.id, '→', user.email)
+    },
   },
   socialProviders: {
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET

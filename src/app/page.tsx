@@ -9,7 +9,7 @@ import type { PetId, PetHomeData } from '@/types'
 
 export default async function HomePage() {
   const session = await auth.api.getSession({ headers: headers() })
-  if (!session?.user?.id) redirect('/login')
+  if (!session?.user?.id) redirect('/landing')
 
   const userId = session.user.id
   const userEmail = session.user.email ?? ''

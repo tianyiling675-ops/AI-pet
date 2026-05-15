@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { signUp } from '@/lib/auth-client'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -19,10 +19,10 @@ export default function RegisterPage() {
       email,
       password,
       name: email,
-      callbackURL: '/',
+      callbackURL: '/login',
       fetchOptions: {
         onError: (ctx) => setError(ctx.error.message || '注册失败，请重试'),
-        onSuccess: () => router.push('/'),
+        onSuccess: () => setDone(true),
       },
     })
     setLoading(false)
@@ -50,6 +50,17 @@ export default function RegisterPage() {
         }}
       >
         <div className="relative z-10 px-10 py-12">
+          {done ? (
+            <div className="text-center py-4">
+              <p className="text-[2rem] font-semibold mb-3" style={{ color: '#f5e6d0' }}>验证邮件已发送</p>
+              <p className="text-sm mb-6" style={{ color: 'rgba(245,220,185,0.75)' }}>
+                请查收 <span style={{ color: '#f5e6d0' }}>{email}</span> 的邮件，点击链接完成验证后再登录。
+              </p>
+              <Link href="/login" className="text-sm font-semibold underline underline-offset-2" style={{ color: '#f5e6d0' }}>
+                去登录
+              </Link>
+            </div>
+          ) : (<>
           <div className="mb-8">
             <h1 className="text-[2rem] font-semibold leading-tight mb-2"
               style={{ color: '#f5e6d0', letterSpacing: '-0.01em', textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}>
@@ -97,6 +108,7 @@ export default function RegisterPage() {
               登录
             </Link>
           </p>
+          </>)}
         </div>
       </div>
     </div>
