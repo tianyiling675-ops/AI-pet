@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { signUp } from '@/lib/auth-client'
+import { signUp, sendVerificationEmail } from '@/lib/auth-client'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -22,7 +22,10 @@ export default function RegisterPage() {
       callbackURL: '/login',
       fetchOptions: {
         onError: (ctx) => setError(ctx.error.message || '注册失败，请重试'),
-        onSuccess: () => setDone(true),
+        onSuccess: async () => {
+          await sendVerificationEmail({ email, callbackURL: '/login' })
+          setDone(true)
+        },
       },
     })
     setLoading(false)

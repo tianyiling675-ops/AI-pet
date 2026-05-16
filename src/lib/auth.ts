@@ -16,6 +16,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+  },
+  emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       const { data, error } = await resend.emails.send({
         from: 'onboarding@resend.dev',
