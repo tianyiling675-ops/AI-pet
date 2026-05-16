@@ -11,7 +11,7 @@ export const orClient = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY!,
   baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
   defaultHeaders: {
-    'HTTP-Referer': process.env.NEXTAUTH_URL || 'http://localhost:3000',
+    'HTTP-Referer': process.env.BETTER_AUTH_URL || 'http://localhost:3000',
     'X-Title': 'AI Pet',
   },
 })
