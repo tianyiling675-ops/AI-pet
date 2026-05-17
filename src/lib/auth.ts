@@ -16,6 +16,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      const { error } = await resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: user.email,
+        subject: '重置你的密码',
+        html: `<p>你好，</p><p>点击下方链接重置密码：</p><p><a href="${url}">${url}</a></p><p>链接 1 小时内有效，如非本人操作请忽略。</p>`,
+      })
+      if (error) console.error('[Resend] 重置密码邮件发送失败:', error)
+      else console.log('[Resend] 重置密码邮件已发送 →', user.email)
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {

@@ -117,6 +117,11 @@ export default function LoginPage() {
               </button>
             </div>
             {error && <p className="text-xs text-center" style={{ color: '#ffb4ab' }}>{error}</p>}
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-xs hover:opacity-70" style={{ color: 'rgba(245,220,185,0.55)' }}>
+                忘记密码？
+              </Link>
+            </div>
             <button type="submit" disabled={loading}
               className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-60 relative overflow-hidden"
               style={{ background: 'rgba(44,26,14,0.75)', backdropFilter: 'blur(8px)', color: '#f5e6d0', letterSpacing: '0.05em', border: '1px solid rgba(255,200,130,0.2)' }}
