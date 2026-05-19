@@ -18,7 +18,7 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       const { error } = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'noreply@rememberme.icu',
         to: user.email,
         subject: '重置你的密码',
         html: `<p>你好，</p><p>点击下方链接重置密码：</p><p><a href="${url}">${url}</a></p><p>链接 1 小时内有效，如非本人操作请忽略。</p>`,
@@ -30,7 +30,7 @@ export const auth = betterAuth({
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
       const { data, error } = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'noreply@rememberme.icu',
         to: user.email,
         subject: '验证你的邮箱',
         html: `<p>你好，</p><p>点击下方链接完成邮箱验证：</p><p><a href="${url}">${url}</a></p><p>链接 1 小时内有效。</p>`,
