@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp, sendVerificationEmail } from '@/lib/auth-client'
 
@@ -15,20 +14,24 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    await signUp.email({
-      email,
-      password,
-      name: email,
-      callbackURL: '/login',
-      fetchOptions: {
-        onError: (ctx) => setError(ctx.error.message || '注册失败，请重试'),
-        onSuccess: async () => {
-          await sendVerificationEmail({ email, callbackURL: '/login' })
-          setDone(true)
-        },
-      },
-    })
-    setLoading(false)
+    try {
+      const { error: signUpError } = await signUp.email({
+        email,
+        password,
+        name: email,
+        callbackURL: '/login',
+      })
+      if (signUpError) {
+        setError(signUpError.message || '注册失败，请重试')
+      } else {
+        await sendVerificationEmail({ email, callbackURL: '/login' }).catch(() => {})
+        setDone(true)
+      }
+    } catch {
+      setError('注册失败，请重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
