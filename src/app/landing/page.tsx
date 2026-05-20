@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PricingSection from './PricingSection'
 
 const pets = [
   {
@@ -273,6 +274,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── 定价 ── */}
+      <PricingSection />
 
       {/* ── CTA ── */}
       <section style={{ padding: '80px 24px', background: '#2c1a0e' }}>
