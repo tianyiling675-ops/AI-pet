@@ -32,6 +32,7 @@ export default function ChatClient({
   const [moodEmoji, setMoodEmoji] = useState(initialMoodEmoji)
   const [loading, setLoading] = useState(false)
   const [input, setInput] = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const conversationRef = useRef<ChatMessage[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -80,6 +81,11 @@ export default function ChatClient({
         body: JSON.stringify({ petId: pet.id, message: text, history: messages.slice(-10) }),
       })
       const json = await res.json()
+      if (json.error === 'LIMIT_REACHED') {
+        setShowUpgrade(true)
+        setMessages((prev) => prev.slice(0, -1)) // 移除刚加的用户消息
+        return
+      }
       if (json.error) {
         setMessages((prev) => [...prev, { role: 'assistant', content: '（走神了，再说一遍？）', createdAt: new Date().toISOString() }])
         return
@@ -100,8 +106,40 @@ export default function ChatClient({
     return new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   }
 
+  async function handleUpgrade() {
+    const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+  }
+
   return (
     <div className="relative h-screen overflow-hidden" style={{ fontFamily: 'Manrope, system-ui, sans-serif' }}>
+
+      {/* 升级弹窗 */}
+      {showUpgrade && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-80 rounded-2xl p-8 text-center" style={{ background: '#1e1a16', border: '1px solid rgba(255,200,130,0.2)' }}>
+            <div className="text-4xl mb-4">✦</div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#f5e6d0' }}>今日消息已用完</h3>
+            <p className="text-sm mb-6" style={{ color: 'rgba(245,220,185,0.6)' }}>
+              免费版每天 10 条消息。<br />
+              订阅会员享受无限对话，¥18 / 月。
+            </p>
+            <button
+              onClick={handleUpgrade}
+              className="w-full py-3 rounded-xl text-sm font-semibold mb-3"
+              style={{ background: '#c08040', color: '#1a0f08' }}>
+              立即订阅 ¥18/月
+            </button>
+            <button
+              onClick={() => setShowUpgrade(false)}
+              className="w-full py-2 text-xs"
+              style={{ color: 'rgba(245,220,185,0.4)' }}>
+              明天再说
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 背景：模糊的宠物照片 */}
       <div className="absolute inset-0 -z-10">

@@ -37,6 +37,23 @@ export async function POST(req: NextRequest) {
   const userId = session.user.id
   const supabase = createServiceClient()
 
+  // 检查订阅状态与每日消息限制
+  const today = new Date().toISOString().slice(0, 10)
+  const [{ data: subData }, { data: msgData }] = await Promise.all([
+    supabase.from('subscriptions').select('status').eq('user_id', userId).single(),
+    supabase.from('daily_messages').select('count').eq('user_id', userId).eq('date', today).single(),
+  ])
+  const isPremium = subData?.status === 'active'
+  const msgCount = msgData?.count ?? 0
+  if (!isPremium && msgCount >= 10) {
+    return NextResponse.json({ data: null, error: 'LIMIT_REACHED' }, { status: 403 })
+  }
+  // 消息数 +1（upsert）
+  await supabase.from('daily_messages').upsert(
+    { user_id: userId, date: today, count: msgCount + 1 },
+    { onConflict: 'user_id,date' }
+  )
+
   // 加载宠物状态和记忆
   const [{ data: stateRows }, { data: kvRows }, { data: diaryRows }] = await Promise.all([
     supabase
