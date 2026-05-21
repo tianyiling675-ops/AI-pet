@@ -26,11 +26,7 @@ function LoginForm() {
 
   async function afterLogin() {
     const callbackURL = searchParams.get('callbackURL')
-    if (callbackURL) {
-      router.push(callbackURL)
-      return
-    }
-    router.push('/')
+    window.location.href = callbackURL ?? '/'
   }
 
   async function handleSubmit(e: React.FormEvent) {
