@@ -25,18 +25,18 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
 
   async function afterLogin() {
-    const callbackURL = searchParams.get('callbackURL')
-    window.location.href = callbackURL ?? '/'
+    window.location.href = searchParams.get('callbackURL') ?? '/'
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const dest = searchParams.get('callbackURL') ?? '/'
     await signIn.email({
       email,
       password,
-      callbackURL: '/',
+      callbackURL: dest,
       fetchOptions: {
         onError: (ctx) => {
           const msg = ctx.error.message || ''
