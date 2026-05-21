@@ -1,16 +1,39 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from '@/lib/auth-client'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextParam = searchParams.get('next')
+  const fromGoogle = searchParams.get('from') === 'google'
+
+  useEffect(() => {
+    if (nextParam === 'checkout' && fromGoogle) {
+      fetch('/api/stripe/checkout', { method: 'POST' }).then(res => {
+        if (res.ok) res.json().then(({ url }) => { if (url) window.location.href = url })
+        else router.push('/')
+      })
+    }
+  }, [nextParam, fromGoogle, router])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  async function afterLogin() {
+    if (nextParam === 'checkout') {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+      if (res.ok) {
+        const { url } = await res.json()
+        if (url) { window.location.href = url; return }
+      }
+    }
+    router.push('/')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,14 +52,15 @@ export default function LoginPage() {
             setError(msg || '邮箱或密码不正确')
           }
         },
-        onSuccess: () => router.push('/'),
+        onSuccess: () => afterLogin(),
       },
     })
     setLoading(false)
   }
 
   async function handleGoogle() {
-    await signIn.social({ provider: 'google', callbackURL: '/' })
+    const callback = nextParam === 'checkout' ? '/login?next=checkout&from=google' : '/'
+    await signIn.social({ provider: 'google', callbackURL: callback })
   }
 
   return (
@@ -159,4 +183,9 @@ export default function LoginPage() {
       </div>
     </div>
   )
+}
+
+import { Suspense } from 'react'
+export default function LoginPage() {
+  return <Suspense><LoginForm /></Suspense>
 }

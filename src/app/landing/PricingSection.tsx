@@ -9,7 +9,7 @@ export default function PricingSection() {
     setLoading(true)
     const res = await fetch('/api/stripe/checkout', { method: 'POST' })
     if (res.status === 401) {
-      window.location.href = '/register'
+      window.location.href = '/login?next=checkout'
       return
     }
     const { url } = await res.json()
