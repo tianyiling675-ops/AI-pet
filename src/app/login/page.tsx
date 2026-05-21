@@ -25,12 +25,10 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
 
   async function afterLogin() {
-    if (nextParam === 'checkout') {
-      const res = await fetch('/api/stripe/checkout', { method: 'POST' })
-      if (res.ok) {
-        const { url } = await res.json()
-        if (url) { window.location.href = url; return }
-      }
+    const callbackURL = searchParams.get('callbackURL')
+    if (callbackURL) {
+      router.push(callbackURL)
+      return
     }
     router.push('/')
   }
